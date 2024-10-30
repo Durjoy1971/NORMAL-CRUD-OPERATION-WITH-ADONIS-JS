@@ -6,7 +6,7 @@ let userDatabase = [
   { id: 3, name: 'Doe John' },
 ]
 
-router.get('Hi', () => 'Hello World')
+router.get('/', () => 'Hello World')
 
 router.get('/users', ({ response }) => response.status(200).json(userDatabase))
 
