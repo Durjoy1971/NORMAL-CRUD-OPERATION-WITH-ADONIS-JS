@@ -10,11 +10,7 @@ export const userDatabase = [
 router.get('/', () => 'Hello World')
 
 router.get('/users/v1/', [CrudsController, 'allUser'])
-
 router.get('/users/v1/find/:id', [CrudsController, 'findUser'])
-
 router.post('/users/v1/update/:id', [CrudsController, 'updateUser'])
-
 router.post('/users/v1/delete/:id', [CrudsController, 'deleteUser'])
-
 router.post('/users/v1/create', [CrudsController, 'createUser'])
