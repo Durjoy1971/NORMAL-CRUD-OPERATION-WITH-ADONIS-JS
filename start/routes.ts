@@ -9,12 +9,12 @@ export const userDatabase = [
 
 router.get('/', () => 'Hello World')
 
-router.get('/users', [CrudsController, 'allUser'])
+router.get('/users/v1/', [CrudsController, 'allUser'])
 
-router.get('/users/find/:id', [CrudsController, 'findUser'])
+router.get('/users/v1/find/:id', [CrudsController, 'findUser'])
 
-router.post('/users/update/:id', [CrudsController, 'updateUser'])
+router.post('/users/v1/update/:id', [CrudsController, 'updateUser'])
 
-router.post('/users/delete/:id', [CrudsController, 'deleteUser'])
+router.post('/users/v1/delete/:id', [CrudsController, 'deleteUser'])
 
-router.post('/users/create', [CrudsController, 'createUser'])
+router.post('/users/v1/create', [CrudsController, 'createUser'])
