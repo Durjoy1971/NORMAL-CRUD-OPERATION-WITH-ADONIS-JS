@@ -1,42 +1,59 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { userDatabase } from '#start/routes'
-import { createUserValidator, UpdateUserValidator } from '#validators/user'
+import {
+  createUserValidator,
+  deleteUserValidator,
+  findUserValidator,
+  UpdateUserValidator,
+} from '#validators/user'
+
+import User from '#models/user'
 
 export default class CrudsController {
   async allUser({ response }: HttpContext) {
-    return response.status(200).json(userDatabase)
+    const userData = await User.all()
+    return response.status(200).json(userData)
   }
 
   async findUser({ params, response }: HttpContext) {
-    const user = userDatabase.find((userID) => userID.id === Number(params.id))
+    const payload = await findUserValidator.validate(params)
+    const user = await User.find(Number(payload.id))
     return user
       ? response.status(200).json(user)
       : response.status(404).json({ message: 'User not found' })
   }
 
   async updateUser({ params, request, response }: HttpContext) {
-    const { name } = request.only(['name'])
-    const userIndex = userDatabase.findIndex((userID) => userID.id === Number(params.id))
-    if (userIndex === -1) return response.status(404).json({ message: 'User not found' })
-    userDatabase[userIndex] = { ...userDatabase[userIndex], name }
-    return response.status(200).json(userDatabase[userIndex])
+    const payload = await UpdateUserValidator.validate({
+      id: params.id,
+      ...request.only(['name']),
+    })
+    const user = await User.findOrFail(Number(payload.id))
+    user.name = payload.name
+    await user.save()
+    return response.status(200).json(user)
   }
 
   async deleteUser({ params, response }: HttpContext) {
-    const userIndex = userDatabase.findIndex((userID) => userID.id === Number(params.id))
-    if (userIndex === -1) return response.status(404).json({ message: 'User not found' })
-    userDatabase.splice(userIndex, 1)
+    const payload = await deleteUserValidator.validate({ id: params.id })
+    const user = await User.findOrFail(Number(payload.id))
+    await user.delete()
     return response.status(200).json({ message: 'User deleted successfully' })
   }
 
   async createUser({ request, response }: HttpContext) {
-    const { name } = request.only(['name'])
-    let id = 1
-    while (true) {
-      if (!userDatabase.find((userID) => userID.id === id)) break
-      id++
+    let id: number = Math.floor(Math.random() * 1000000)
+    while ((await User.findBy('id', id)) !== null) {
+      console.log(id)
+      id = Math.floor(Math.random() * 1000000)
     }
-    userDatabase.push({ id, name })
-    return response.status(201).json({ id, name })
+    const payload = await createUserValidator.validate({ ...request.only(['name']), id })
+    const user = new User()
+    user
+      .fill({
+        id: payload.id,
+        name: payload.name,
+      })
+      .save()
+    return response.status(201).json({ id, name: payload.name })
   }
 }
